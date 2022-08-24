@@ -30,78 +30,76 @@
 import os
 
 def Main():
-	errorMessages = ""
-
-	sessionsFileName = os.path.expanduser("~") + "/SessionList.txt"
-	if not os.path.exists(sessionsFileName):
-		crt.Dialog.MessageBox(
+#please replace your username and your password with actual username and password
+    username = ("your username")
+    password = ("your password")
+    errorMessages = ""
+    sessionsFileName = os.path.expanduser("~") + "\SessionList.txt"
+    if not os.path.exists(sessionsFileName):
+        crt.Dialog.MessageBox(
 			"Session list file not found:\n\n" +
 			sessionsFileName + "\n\n" +
 			"Create a session list file as described in the description of " +
 			"this script code and then run the script again.")
-		return
-
-	sessionFile = open(sessionsFileName, "r")
-	sessionsArray = []
-
-	for line in sessionFile:
-		session = line.strip()
-		if session:	# Don't add empty lines/sessions
-			sessionsArray.append(session)
-
-	sessionFile.close()
+        return
+    sessionFile = open(sessionsFileName, "r")
+    sessionsArray = []
+    for line in sessionFile:
+        session = line.strip()
+        if session:	# Don't add empty lines/sessions
+            sessionsArray.append(session)
+    sessionFile.close()
 
 	# Connect to each session and issue a few commands, then disconnect.
-	for session in sessionsArray:
+    for session in sessionsArray:
 		#crt.Dialog.MessageBox("Connecting to Session: " + session)
-
-		try:
-			crt.Session.Connect("/S \"" + session + "\"")
-		except ScriptError:
-			error = crt.GetLastErrorMessage()
+        try:
+            crt.Session.Connect("/S \"" + session + "\"")
+        except ScriptError:
+            error = crt.GetLastErrorMessage()
 
 		# If we successfully connected, we'll do the work we intend to do...
 		# otherwise, we'll skip the work and move on to the next session in 
 		# the list.
-		if crt.Session.Connected:
-			crt.Screen.Synchronous = True
+        if crt.Session.Connected:
+            crt.Screen.Synchronous = True
 
 			# When we first connect, there will likely be data arriving from the
 			# remote system.  This is one way of detecting when it's safe to
 			# start sending data.
-			while True:				
-				if not crt.Screen.WaitForCursor(1):
-					break
+            #while True:				
+                #if not crt.Screen.WaitForCursor(1):
+                    #break
 			# Once the cursor has stopped moving for about a second, we'll
 			# assume it's safe to start interacting with the remote system.
 
 			# Get the shell prompt so that we can know what to look for when
 			# determining if the command is completed. Won't work if the prompt
 			# is dynamic (e.g. changes according to current working folder, etc)
-			row = crt.Screen.CurrentRow
-			prompt = crt.Screen.Get(row, 0, row, crt.Screen.CurrentColumn - 1)
-			prompt = prompt.strip()
-
-			crt.Screen.Send("show ver | no-more"  + chr(13))
+            #row = crt.Screen.CurrentRow
+            #prompt = crt.Screen.Get(row, 0, row, crt.Screen.CurrentColumn - 1)
+            #prompt = prompt.strip()
+            crt.Screen.WaitForString("login:")
+            crt.Screen.SendString (username + chr(13))
+            crt.Screen.WaitForString("password:")
+            crt.Screen.SendString (password + chr(13))
+            crt.Screen.WaitForString(">")
+            crt.Screen.Send("show ver | no-more"  + chr(13))
 			# Wait for the command to complete, by looking for the prompt to
 			# appear once again.
-			crt.Screen.WaitForString(">")
-
+            crt.Screen.WaitForString(">")
 			# Now disconnect from the remote machine...
-			crt.Session.Disconnect()
+            crt.Session.Disconnect()
 			# Wait for the connection to close
-			while crt.Session.Connected == True:
-				crt.Sleep(100)
-
-			crt.Sleep(1000)
-		else:
-			errorMessages = errorMessages + "\n" + "*** Error connecting to " + session + ": " + error
-
-	if errorMessages == "":
-		crt.Dialog.MessageBox("Tasks completed.  No Errors were detected.")
-	else:
-		crt.Dialog.MessageBox("Tasks completed.  The following errors occurred:\n" + errorMessages)
-
-	crt.Quit()
+            while crt.Session.Connected == True:
+                crt.Sleep(100)
+            crt.Sleep(1000)
+        else:
+            errorMessages = errorMessages + "\n" + "*** Error connecting to " + session + ": " + error
+        if errorMessages == "":
+            crt.Dialog.MessageBox("Tasks completed.  No Errors were detected.")
+        else:
+            crt.Dialog.MessageBox("Tasks completed.  The following errors occurred:\n" + errorMessages)
+    crt.Quit()
 
 Main()
