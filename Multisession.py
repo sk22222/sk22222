@@ -32,7 +32,7 @@ import os
 def Main():
 #please replace your username and your password with actual username and password
     username = ("your username")
-    password = ("your password")
+    password = ("C0l0r@d0l1f3!")
     errorMessages = ""
     sessionsFileName = os.path.expanduser("~") + "\SessionList.txt"
     if not os.path.exists(sessionsFileName):
@@ -46,10 +46,11 @@ def Main():
     sessionsArray = []
     for line in sessionFile:
         session = line.strip()
+        #crt.Dialog.MessageBox(session)
         if session:	# Don't add empty lines/sessions
             sessionsArray.append(session)
     sessionFile.close()
-
+    #crt.Dialog.MessageBox("session file closed")
 	# Connect to each session and issue a few commands, then disconnect.
     for session in sessionsArray:
 		#crt.Dialog.MessageBox("Connecting to Session: " + session)
@@ -63,26 +64,34 @@ def Main():
 		# the list.
         if crt.Session.Connected:
             crt.Screen.Synchronous = True
+            crt.Dialog.MessageBox("session connected")
 
 			# When we first connect, there will likely be data arriving from the
 			# remote system.  This is one way of detecting when it's safe to
 			# start sending data.
-            #while True:				
-                #if not crt.Screen.WaitForCursor(1):
-                    #break
+            while True:				
+                if not crt.Screen.WaitForCursor(1):
+                    break
 			# Once the cursor has stopped moving for about a second, we'll
 			# assume it's safe to start interacting with the remote system.
 
 			# Get the shell prompt so that we can know what to look for when
 			# determining if the command is completed. Won't work if the prompt
 			# is dynamic (e.g. changes according to current working folder, etc)
-            #row = crt.Screen.CurrentRow
-            #prompt = crt.Screen.Get(row, 0, row, crt.Screen.CurrentColumn - 1)
-            #prompt = prompt.strip()
-            crt.Screen.WaitForString("login:")
-            crt.Screen.SendString (username + chr(13))
-            crt.Screen.WaitForString("password:")
-            crt.Screen.SendString (password + chr(13))
+            row = crt.Screen.CurrentRow
+            prompt = crt.Screen.Get(row, 0, row, crt.Screen.CurrentColumn - 1)
+            prompt = prompt.strip()
+            crt.Screen.Send("ssh " + chr(9) + session + chr(13))
+            if crt.Screen.WaitForString("(yes/no)?"):
+                #crt.Dialog.MessageBox("else statement is not working")
+                #crt.Dialog.MessageBox("else statement is not working")
+                crt.Screen.Send("yes" + chr(13))
+                crt.Screen.WaitForString("password:")
+                crt.Screen.Send(password + chr(13))
+            elif crt.Screen.WaitForString("password:"):
+                crt.Screen.Send(password + chr(13))    
+            else:
+                crt.Dialog.MessageBox("if else statement is broke")
             crt.Screen.WaitForString(">")
             crt.Screen.Send("show ver | no-more"  + chr(13))
 			# Wait for the command to complete, by looking for the prompt to
