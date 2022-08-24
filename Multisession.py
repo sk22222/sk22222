@@ -82,20 +82,10 @@ def Main():
 			prompt = crt.Screen.Get(row, 0, row, crt.Screen.CurrentColumn - 1)
 			prompt = prompt.strip()
 
-			crt.Screen.Send("ls -l\n")
+			crt.Screen.Send("show ver | no-more"  + chr(13))
 			# Wait for the command to complete, by looking for the prompt to
 			# appear once again.
-			crt.Screen.WaitForString(prompt)
-
-			crt.Screen.Send("pwd\n")
-			# Wait for the command to complete, by looking for the prompt to
-			# appear once again.
-			crt.Screen.WaitForString(prompt)
-
-			crt.Screen.Send("who\n")
-			# Wait for the command to complete, by looking for the prompt to
-			# appear once again.
-			crt.Screen.WaitForString(prompt)
+			crt.Screen.WaitForString(">")
 
 			# Now disconnect from the remote machine...
 			crt.Session.Disconnect()
